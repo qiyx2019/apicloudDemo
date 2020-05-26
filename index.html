@@ -1,89 +1,104 @@
 <!doctype html>
 <html>
-
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,initial-scale=1.0,width=device-width" />
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
     <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
-    <title>Hello APP</title>
+    <title>Root Window</title>
     <link rel="stylesheet" type="text/css" href="./css/api.css" />
-    <style type="text/css">
-        html,
-        body {
-            height: 100%;
-        }
+ 
+    <style type='text/css'>
 
-        .wrap {
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-flex-flow: column;
-        }
-
-        header {
-            height: 44px;
-            width: 100%;
-            text-align: center;
-            background-color: #81a9c3;
-            color: #fff;
-            line-height: 44px;
-            font-size: 20px;
-        }
-
-        .flex-1 {
-            -webkit-box-flex: 1;
-            -webkit-flex: 1;
-        }
-
-        footer {
-            height: 30px;
-            width: 100%;
-            background-color: #81a9c3;
-            color: white;
-            line-height: 30px;
-            text-align: center;
-        }
     </style>
 </head>
+<body>
+    <div id="app">
+        <header class="aui-bar aui-bar-nav disnone"   :data-id="index"
+                v-for="(vo,index) in list" v-bind:class="{'disblock': count_index== index}">
+            {{vo.title}}
+        </header>
 
-<body class="wrap">
-    <header>APICloud</header>
-    <section class="flex-1">
 
-    </section>
-    <footer>Copyright &copy;<span id="year"></span></footer>
+        <footer class="aui-bar aui-bar-tab" id="footer">
+            <div class="aui-bar-tab-item" tapmode v-for="(vo,index) in list" v-bind:class="{'aui-active': cou_index == index}" @click="change_menu(index)">
+                <i class="iconfont icon-home7" v-if="index == 0"></i>
+                <i class="iconfont icon-fenlei" v-if="index == 1"></i>
+                <i class="iconfont icon-gouwuche" v-if="index == 2"></i>
+                <i class="iconfont icon-wode" v-if="index == 3"></i>
+                <div class="aui-bar-tab-label">{{vo.title}}</div>
+            </div>
+        </footer>
+    </div>
 </body>
+</html>
+<script src="./script/vue.js"></script>
+<script type="text/javascript" src="./script/db.js"></script>
 <script type="text/javascript" src="./script/api.js"></script>
 <script type="text/javascript">
-    apiready = function() {
-        //输出Log，Log将显示在APICloud Studio控制台
-        console.log("Hello World! Hello APICloud!");
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            count_index: 0,
+            list: [
+                {title: '首页'},
+                {title:'分类'},
+                {title:'购物车'},
+                {title:'我的'}
+            ]
+        },
+        methods: {
+            init: function() {
+                api.openFrame({
+                    name: 'indexGroup',
+                    background:'bgcolor',
+                    scrollEnabled: true,
+                    rect: {
+                        x: 0,
+                        y: $api.dom('header').offsetHeight,
+                        w: api.winWidth,
+                        h: api.winHeight - $api.dom('header').offsetHeight - $api.dom('footer').offsetHeight
+                    },
+                    index: vm.count_index,
+                    frames:[
+                        {name: 'index',
+                        url: './html/main.html',
+                        bounces: true
+                    }
+                    ]
+                },function(ret,err) {
 
-        var header = $api.dom('header'); // 获取 header 标签元素
-        var footer = $api.dom('footer'); // 获取 footer 标签元素
-
-        // 1.修复开启沉浸式效果带来的顶部Header与手机状态栏重合的问题，最新api.js方法已支持适配iPhoneX；
-        // 2.默认已开启了沉浸式效果 config.xml中 <preference name="statusBarAppearance" value="true"/>
-        // 3.沉浸式效果适配支持iOS7+，Android4.4+以上版本
-        var headerH = $api.fixStatusBar(header);
-        // 最新api.js为了适配iPhoneX增加的方法，修复底部Footer部分与iPhoneX的底部虚拟横条键重叠的问题；
-        var footerH = $api.fixTabBar(footer);
-
-        api.openFrame({
-            name: 'main',
-            url: 'html/main.html',
-            bounces: true,
-            rect: { // 推荐使用Margin布局，用于适配屏幕的动态变化
-                marginTop: headerH, // main页面距离win顶部的高度
-                marginBottom: footerH, // main页面距离win底部的高度
-                w: 'auto' // main页面的宽度 自适应屏幕宽度
+                });
+            },
+            change_menu: function(index) {
+                if(vm.count_index == index ) {
+                    return ;
+                }
+                vm.count_index = index
+                api.setFrameGroupIndex({
+                    name: 'indexGroup',
+                    index: index
+                })
             }
-        });
-
-        // 获取当前年份时间，并加载显示到页面
-        var year = $api.byId('year');
-        year.innerHTML = new Date().getFullYear();
+        },
+    })
+    apiready = function(){
+        var headerList = $api.domAll('header')
+        for(var i=0;i<headerList.length;i++) {
+            $api.fixIos7Bar(headerList[i])
+        }
+      // 初始化商品分类列表
+      // initWareTypeList();
+      // 初始化本地数据库及应用需要的相关表结构
+      // initDatabase();
+      // 初始化第三方模块
+      // initPushGeTui();
+      // 1. 根据UI架构设计，打开首页window
+      // 2. 由于是次window是首页窗口，通过设置参数slidBackEnabled 关闭IOS默认
+    //   api.openWin({
+    //       name: 'main',
+    //       url: './html/main.html',
+    //       slidBackEnabled: false
+    //   });
+        vm.init()
     };
-
 </script>
-
-</html>
