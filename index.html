@@ -6,99 +6,31 @@
     <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
     <title>Root Window</title>
     <link rel="stylesheet" type="text/css" href="./css/api.css" />
- 
     <style type='text/css'>
 
     </style>
 </head>
 <body>
-    <div id="app">
-        <header class="aui-bar aui-bar-nav disnone"   :data-id="index"
-                v-for="(vo,index) in list" v-bind:class="{'disblock': count_index== index}">
-            {{vo.title}}
-        </header>
-
-
-        <footer class="aui-bar aui-bar-tab" id="footer">
-            <div class="aui-bar-tab-item" tapmode v-for="(vo,index) in list" v-bind:class="{'aui-active': cou_index == index}" @click="change_menu(index)">
-                <i class="iconfont icon-home7" v-if="index == 0"></i>
-                <i class="iconfont icon-fenlei" v-if="index == 1"></i>
-                <i class="iconfont icon-gouwuche" v-if="index == 2"></i>
-                <i class="iconfont icon-wode" v-if="index == 3"></i>
-                <div class="aui-bar-tab-label">{{vo.title}}</div>
-            </div>
-        </footer>
-    </div>
 </body>
 </html>
-<script src="./script/vue.js"></script>
 <script type="text/javascript" src="./script/db.js"></script>
 <script type="text/javascript" src="./script/api.js"></script>
-<script type="text/javascript">
-    var vm = new Vue({
-        el: '#app',
-        data: {
-            count_index: 0,
-            list: [
-                {title: '首页'},
-                {title:'分类'},
-                {title:'购物车'},
-                {title:'我的'}
-            ]
-        },
-        methods: {
-            init: function() {
-                api.openFrame({
-                    name: 'indexGroup',
-                    background:'bgcolor',
-                    scrollEnabled: true,
-                    rect: {
-                        x: 0,
-                        y: $api.dom('header').offsetHeight,
-                        w: api.winWidth,
-                        h: api.winHeight - $api.dom('header').offsetHeight - $api.dom('footer').offsetHeight
-                    },
-                    index: vm.count_index,
-                    frames:[
-                        {name: 'index',
-                        url: './html/main.html',
-                        bounces: true
-                    }
-                    ]
-                },function(ret,err) {
 
-                });
-            },
-            change_menu: function(index) {
-                if(vm.count_index == index ) {
-                    return ;
-                }
-                vm.count_index = index
-                api.setFrameGroupIndex({
-                    name: 'indexGroup',
-                    index: index
-                })
-            }
-        },
-    })
+<script type="text/javascript">
     apiready = function(){
         var headerList = $api.domAll('header')
         for(var i=0;i<headerList.length;i++) {
             $api.fixIos7Bar(headerList[i])
         }
-      // 初始化商品分类列表
-      // initWareTypeList();
-      // 初始化本地数据库及应用需要的相关表结构
-      // initDatabase();
-      // 初始化第三方模块
-      // initPushGeTui();
-      // 1. 根据UI架构设计，打开首页window
-      // 2. 由于是次window是首页窗口，通过设置参数slidBackEnabled 关闭IOS默认
-    //   api.openWin({
-    //       name: 'main',
-    //       url: './html/main.html',
-    //       slidBackEnabled: false
-    //   });
-        vm.init()
+        api.openWin({
+            name:'home',
+            url:'./html/home.html',
+            slideBackEnabled: false
+        })
+        api.addEventListener({
+            name: 'batterylow'
+        }, function(ret, err){
+           alert('本机点亮剩余' + JSON.stringify(ret))
+        });
     };
 </script>
